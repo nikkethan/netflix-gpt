@@ -11,6 +11,8 @@
 - Firebase Setup
 - Firebase Deployment
 - Sign Up User
+- Implement Sign in User API
+- Create Redux Store with user Slice
 
 # Getting Started with Create React App
 
