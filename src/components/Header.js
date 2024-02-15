@@ -3,9 +3,14 @@ import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../utils/firebase";
 import { useDispatch, useSelector } from "react-redux";
+import { useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { addUser, removeUser } from "../utils/userSlice";
+import { NETFLIX_LOGO,DEFAULT_PROFILE_PICTURE } from "../utils/constant";
 
 const Header = () => {
   const user = useSelector((store) => store.user);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const handleSignOut = () => {
     signOut(auth)
@@ -16,13 +21,35 @@ const Header = () => {
         navigate("/error");
       });
   };
-
+  useState(() => {
+    console.log("1. Use State & auth chnge -", auth);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("3. Use State & auth chnge -", auth);
+        const { uid, email, displayName, photoURL } = user;
+        dispatch(
+          addUser({
+            uid: uid,
+            email: email,
+            displayName: displayName,
+            photoURL: photoURL,
+          })
+        );
+        navigate("/browse");
+        // ...
+      } else {
+        console.log("4. Use State & auth chnge -", auth);
+        dispatch(removeUser(null));
+        navigate("/");
+      }
+    });
+    return () => unsubscribe();
+  }, []);
   return (
     <div className="absolute px-8 py-2 bg-gradient-to-b from-black z-10 w-screen flex justify-between">
       <img
         className="w-48"
-        src="
-https://cdn.cookielaw.org/logos/dd6b162f-1a32-456a-9cfe-897231c7763c/4345ea78-053c-46d2-b11e-09adaef973dc/Netflix_Logo_PMS.png"
+        src = {NETFLIX_LOGO}F
         alt="netflix-logo"
       />
       {user && (
@@ -30,7 +57,7 @@ https://cdn.cookielaw.org/logos/dd6b162f-1a32-456a-9cfe-897231c7763c/4345ea78-05
           <img
             className="h-8 w-8 m-4 rounded-lg"
             alt="profile-pic"
-            src="https://avatars.githubusercontent.com/u/59530067?v=4"
+            src= {DEFAULT_PROFILE_PICTURE}
           ></img>
           <button
             className="bg-red-500 hover:bg-red-600 text-white font-bold text-sm p-2  m-4 rounded h-8 w-auto"
